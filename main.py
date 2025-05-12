@@ -1,11 +1,9 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error
 
 def simulate_n_days(n_days: int, n_daily_workers: int, portions: np.ndarray):
     # Ensure correct input
@@ -84,17 +82,16 @@ def run_n_simulations(n_sims, n_days, n_daily_workers, n_total_workers):
     print(f'Accuracy: {accuracy * 100:.2f}%')
     return accuracy
 
-def create_scatterplot(x, y, xlabel, title):
+def create_scatterplot(x, y, xlabel, ylabel, title):
     plt.figure(figsize=(8, 6))
     plt.scatter(x, y, color='blue', alpha=0.7, edgecolors='black')
     plt.title(title)
     plt.xlabel(xlabel)
-    plt.ylabel("Accuracy")
+    plt.ylabel(ylabel)
     plt.show()
     
-def generate_scatterplot():
+def anlayze_accuracy():
     N_SIMS = 100
-    N_DAYS = 365
     N_DAILY_WORKERS = 3
     N_TOTAL_WORKERS = 20
     
@@ -110,8 +107,63 @@ def generate_scatterplot():
         print(f'N_DAYS={n_days}')
         y[i] = run_n_simulations(N_SIMS, n_days, N_DAILY_WORKERS, N_TOTAL_WORKERS)
         
-    create_scatterplot(x, y, 'n_days', 'Change in accuracy vs. number of days with data')
+    create_scatterplot(x, y, 'n_days', 'Accuracy', 'Change in accuracy vs. number of days with data')
     
+def simulate_chipotle():
+    N_DAYS = 20                 # 20 shifts are evaluated
+    N_DAILY_WORKERS = 3         # 3 food-assembly workers per shift
+    N_TOTAL_WORKERS = 20        # 20 total workers
+    
+    N_EPOCHS = 100              # Number of times the worst-performing worker is replaced
+    
+    # Initial portions
+    portions = np.random.normal(113, 25, (N_TOTAL_WORKERS))
+    
+    # Data for scatterplot
+    x = np.array(range(N_EPOCHS))
+    y = np.zeros((len(x)))
+    
+    # Early stopping
+    best_loss = float('infinity')
+    patience = 10
+    counter = 0
+    
+    for i in range(N_EPOCHS):
+        print(f'[Epoch {i + 1}]')
+        
+        # Run simulation
+        y_total, x_total = simulate_n_days(N_DAYS, N_DAILY_WORKERS, portions)
+        
+        # Compute loss
+        loss = np.average(y_total) - 113
+        y[i] = loss
+        print(f'Loss: {loss:.4f}\n')
+    
+        # Replace worst-performing worker
+        coefs = get_coefficients(y_total, x_total)
+        argmax = np.argmax(coefs)
+        
+        if loss < best_loss:
+            best_loss = loss
+            counter = 0
+            
+        else:
+            counter += 1
+            
+            if counter >= patience:
+                print(f'Early stopping after {i + 1} epochs...\n')
+                break
+        
+        print(f'Replacing worker {argmax + 1}...')
+        print(f'Old portion size: {portions[argmax]}')
+        
+        portions[argmax] = np.random.normal(113, 25)
+        print(f'New portion size: {portions[argmax]}\n')
+        
+    create_scatterplot(x, y, 'Epoch', 'Loss', 'Change in loss vs. number of replacement iterations')
+    
+def main():
+    simulate_chipotle()
 
 if __name__ == '__main__':
     main()

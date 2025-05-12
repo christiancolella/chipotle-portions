@@ -96,7 +96,7 @@ def anlayze_accuracy():
     N_TOTAL_WORKERS = 20
     
     # Allow n_days to vary
-    min_n_days = 100
+    min_n_days = 10
     max_n_days = 600
     
     # Scatterplot data
@@ -107,14 +107,14 @@ def anlayze_accuracy():
         print(f'N_DAYS={n_days}')
         y[i] = run_n_simulations(N_SIMS, n_days, N_DAILY_WORKERS, N_TOTAL_WORKERS)
         
-    create_scatterplot(x, y, 'n_days', 'Accuracy', 'Accuracy vs. number of days with data')
+    create_scatterplot(x, y, 't', 'Accuracy', 'Accuracy vs. number of days with data')
     
 def simulate_chipotle():
-    N_DAYS = 20                 # 20 shifts are evaluated
+    N_DAYS = 30                 # 30 shifts are evaluated
     N_DAILY_WORKERS = 3         # 3 food-assembly workers per shift
     N_TOTAL_WORKERS = 20        # 20 total workers
     
-    N_EPOCHS = 100              # Number of times the worst-performing worker is replaced
+    N_EPOCHS = 200              # Number of times the worst-performing worker is replaced
     
     # Initial portions
     portions = np.random.normal(113, 25, (N_TOTAL_WORKERS))

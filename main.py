@@ -107,7 +107,7 @@ def anlayze_accuracy():
         print(f'N_DAYS={n_days}')
         y[i] = run_n_simulations(N_SIMS, n_days, N_DAILY_WORKERS, N_TOTAL_WORKERS)
         
-    create_scatterplot(x, y, 'n_days', 'Accuracy', 'Change in accuracy vs. number of days with data')
+    create_scatterplot(x, y, 'n_days', 'Accuracy', 'Accuracy vs. number of days with data')
     
 def simulate_chipotle():
     N_DAYS = 20                 # 20 shifts are evaluated
@@ -124,9 +124,9 @@ def simulate_chipotle():
     y = np.zeros((len(x)))
     
     # Early stopping
-    best_loss = float('infinity')
-    patience = 10
-    counter = 0
+    # best_loss = float('infinity')
+    # patience = 10
+    # counter = 0
     
     for i in range(N_EPOCHS):
         print(f'[Epoch {i + 1}]')
@@ -134,25 +134,26 @@ def simulate_chipotle():
         # Run simulation
         y_total, x_total = simulate_n_days(N_DAYS, N_DAILY_WORKERS, portions)
         
-        # Compute loss
-        loss = np.average(y_total) - 113
-        y[i] = loss
-        print(f'Loss: {loss:.4f}\n')
+        # Compute average portion size
+        avg_portion = np.average(y_total)
+        y[i] = avg_portion
+        print(f'Avg portion: {avg_portion:.4f}\n')
     
         # Replace worst-performing worker
         coefs = get_coefficients(y_total, x_total)
         argmax = np.argmax(coefs)
         
-        if loss < best_loss:
-            best_loss = loss
-            counter = 0
+        # Early stopping
+        # if loss < best_loss:
+        #     best_loss = loss
+        #     counter = 0
             
-        else:
-            counter += 1
+        # else:
+        #     counter += 1
             
-            if counter >= patience:
-                print(f'Early stopping after {i + 1} epochs...\n')
-                break
+        #     if counter >= patience:
+        #         print(f'Early stopping after {i + 1} epochs...\n')
+        #         break
         
         print(f'Replacing worker {argmax + 1}...')
         print(f'Old portion size: {portions[argmax]}')
@@ -160,7 +161,7 @@ def simulate_chipotle():
         portions[argmax] = np.random.normal(113, 25)
         print(f'New portion size: {portions[argmax]}\n')
         
-    create_scatterplot(x, y, 'Epoch', 'Loss', 'Change in loss vs. number of replacement iterations')
+    create_scatterplot(x, y, 'Epoch', 'Mean Portion (g)', 'Mean portion vs. number of replacement iterations')
     
 def main():
     simulate_chipotle()
